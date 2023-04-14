@@ -56,7 +56,7 @@ class CountingAdapterDecorator implements AdapterInterface, CacheInterface, Logg
         return $this->adapter->clear($prefix);
     }
 
-    public function get(string $key, callable $callback, float $beta = null, array &$metadata = null)
+    public function get(string $key, callable $callback, float $beta = null, array &$metadata = null): mixed
     {
         return $this->adapter->get($key, $callback, $beta, $metadata);
     }
