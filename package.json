@@ -2,10 +2,13 @@
     "devDependencies": {
         "@babel/core": "^7.17.0",
         "@babel/preset-env": "^7.16.0",
+        "@popperjs/core": "^2.11.8",
         "@symfony/webpack-encore": "^4.0.0",
         "bootstrap": "^5.3.0",
         "core-js": "^3.23.0",
+        "node-sass": "^9.0.0",
         "regenerator-runtime": "^0.13.9",
+        "sass-loader": "^13.3.1",
         "vue": "^2.6.0",
         "vue-loader": "^15.9.5",
         "vue-template-compiler": "^2.7.14",
