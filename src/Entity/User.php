@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use JetBrains\PhpStorm\ArrayShape;
+
 class User
 {
     public function __construct(
@@ -50,5 +52,16 @@ class User
     public function setPhone(string $phone): void
     {
         $this->phone = $phone;
+    }
+
+    #[ArrayShape(['firstName' => 'string', 'middleName' => 'string', 'lastName' => 'string', 'phone' => 'string'])]
+    public function toArray(): array
+    {
+        return [
+            'firstName' => $this->firstName,
+            'middleName' => $this->middleName,
+            'lastName' => $this->lastName,
+            'phone' => $this->phone,
+        ];
     }
 }
