@@ -13,11 +13,10 @@ class WorldController extends AbstractController
     {
     }
 
-    /**
-     * @throws JsonException
-     */
     public function hello(): Response
     {
-        return $this->render('user-vue.twig', ['users' => json_encode($this->userManager->getUsersListVue(), JSON_THROW_ON_ERROR)]);
+        $user = $this->userManager->create('My user');
+
+        return $this->json($user->toArray());
     }
 }
