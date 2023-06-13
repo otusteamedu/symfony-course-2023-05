@@ -3,36 +3,30 @@
 namespace App\Entity;
 
 use DateTime;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JetBrains\PhpStorm\ArrayShape;
 
-#[ORM\Table(name: '`user`')]
+#[ORM\Table(name: 'tweet')]
 #[ORM\Entity]
-class User
+class Tweet
 {
     #[ORM\Column(name: 'id', type: 'bigint', unique: true)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 32, nullable: false)]
-    private string $login;
+    #[ORM\ManyToOne(targetEntity: 'User', inversedBy: 'tweets')]
+    #[ORM\JoinColumn(name: 'author_id', referencedColumnName: 'id')]
+    private User $author;
+
+    #[ORM\Column(type: 'string', length: 140, nullable: false)]
+    private string $text;
 
     #[ORM\Column(name: 'created_at', type: 'datetime', nullable: false)]
     private DateTime $createdAt;
 
     #[ORM\Column(name: 'updated_at', type: 'datetime', nullable: false)]
     private DateTime $updatedAt;
-
-    #[ORM\OneToMany(mappedBy: 'author', targetEntity: 'Tweet')]
-    private Collection $tweets;
-
-    public function __construct()
-    {
-        $this->tweets = new ArrayCollection();
-    }
 
     public function getId(): int
     {
@@ -44,14 +38,24 @@ class User
         $this->id = $id;
     }
 
-    public function getLogin(): string
+    public function getAuthor(): User
     {
-        return $this->login;
+        return $this->author;
     }
 
-    public function setLogin(string $login): void
+    public function setAuthor(User $author): void
     {
-        $this->login = $login;
+        $this->author = $author;
+    }
+
+    public function getText(): string
+    {
+        return $this->text;
+    }
+
+    public function setText(string $text): void
+    {
+        $this->text = $text;
     }
 
     public function getCreatedAt(): DateTime {
@@ -70,21 +74,14 @@ class User
         $this->updatedAt = new DateTime();
     }
 
-    #[ArrayShape([
-        'id' => 'int|null',
-        'login' => 'string',
-        'createdAt' => 'string',
-        'updatedAt' => 'string',
-        'tweets' => ['id' => 'int|null', 'login' => 'string', 'createdAt' => 'string', 'updatedAt' => 'string']]
-    )]
+    #[ArrayShape(['id' => 'int|null', 'login' => 'string', 'createdAt' => 'string', 'updatedAt' => 'string'])]
     public function toArray(): array
     {
         return [
             'id' => $this->id,
-            'login' => $this->login,
+            'login' => $this->author->getLogin(),
             'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
             'updatedAt' => $this->updatedAt->format('Y-m-d H:i:s'),
-            'tweets' => array_map(static fn(Tweet $tweet) => $tweet->toArray(), $this->tweets->toArray()),
         ];
     }
 }
