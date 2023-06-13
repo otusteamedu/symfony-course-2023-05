@@ -95,6 +95,13 @@ class User
         }
     }
 
+    public function addAuthor(User $author): void
+    {
+        if (!$this->authors->contains($author)) {
+            $this->authors->add($author);
+        }
+    }
+
     #[ArrayShape([
         'id' => 'int|null',
         'login' => 'string',
