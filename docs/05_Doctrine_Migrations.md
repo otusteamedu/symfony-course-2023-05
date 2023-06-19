@@ -170,7 +170,7 @@
     ```
 4. В файле `config/services.yaml` добавляем новый сервис
     ```yaml
-    App\Symfony\MetaTimestampsPrePersistEventListener:
+    App\Doctrine\MetaTimestampsPrePersistEventListener:
         tags:
             - { name: doctrine.event_listener, event: prePersist }
     ```
