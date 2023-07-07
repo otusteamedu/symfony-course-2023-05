@@ -9,18 +9,20 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use JetBrains\PhpStorm\ArrayShape;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Table(name: '`user`')]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User implements HasMetaTimestampsInterface
+class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Column(name: 'id', type: 'bigint', unique: true)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 32, nullable: false)]
+    #[ORM\Column(type: 'string', length: 32, unique: true, nullable: false)]
     private string $login;
 
     #[ORM\Column(name: 'created_at', type: 'datetime', nullable: false)]
@@ -49,7 +51,7 @@ class User implements HasMetaTimestampsInterface
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: 'Subscription')]
     private Collection $subscriptionFollowers;
 
-    #[ORM\Column(type: 'string', length: 32, nullable: false)]
+    #[ORM\Column(type: 'string', length: 120, nullable: false)]
     private string $password;
 
     #[Assert\NotBlank]
@@ -59,6 +61,9 @@ class User implements HasMetaTimestampsInterface
 
     #[ORM\Column(type: 'boolean', nullable: false)]
     private bool $isActive;
+
+    #[ORM\Column(type: 'json', length: 1024, nullable: false)]
+    private array $roles = [];
 
     public function __construct()
     {
@@ -180,9 +185,50 @@ class User implements HasMetaTimestampsInterface
         return $this->followers->toArray();
     }
 
+    /**
+     * @return string[]
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    /**
+     * @param string[] $roles
+     */
+    public function setRoles(array $roles): void
+    {
+        $this->roles = $roles;
+    }
+
+    public function getSalt(): ?string
+    {
+        return null;
+    }
+
+    public function eraseCredentials(): void
+    {
+    }
+
+    public function getUsername(): string
+    {
+        return $this->login;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->login;
+    }
+
     #[ArrayShape([
         'id' => 'int|null',
         'login' => 'string',
+        'password' => 'string',
+        'roles' => 'string[]',
         'createdAt' => 'string',
         'updatedAt' => 'string',
         'tweets' => ['id' => 'int|null', 'login' => 'string', 'createdAt' => 'string', 'updatedAt' => 'string'],
@@ -196,6 +242,8 @@ class User implements HasMetaTimestampsInterface
         return [
             'id' => $this->id,
             'login' => $this->login,
+            'password' => $this->password,
+            'roles' => $this->getRoles(),
             'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
             'updatedAt' => $this->updatedAt->format('Y-m-d H:i:s'),
             'tweets' => array_map(static fn(Tweet $tweet) => $tweet->toArray(), $this->tweets->toArray()),
