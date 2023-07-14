@@ -82,3 +82,8 @@ services:
     App\EventListener\DeprecatedApiExceptionListener:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
+
+    monolog.formatter.app_formatter:
+        class: Monolog\Formatter\LineFormatter
+        arguments:
+            - "[%%level_name%%]: [%%datetime%%] %%message%%\n"
