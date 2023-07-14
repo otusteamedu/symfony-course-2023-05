@@ -7,6 +7,7 @@ when@dev:
         handlers:
             main:
                 type: stream
+                formatter: monolog.formatter.app_formatter
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: critical
                 channels: ["!event"]
