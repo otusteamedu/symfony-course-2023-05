@@ -356,14 +356,17 @@
     ```
 5. В `config/services.yaml` добавляем
    ```yaml
-   App\Client\StatsdAPIClient:
-   arguments:
-   - graphite
-   - 8125
-   - my_app
+    App\Controller\Api\CreateUser\v5\CreateUserManager: ~
+
+    App\Controller\Api\CreateUser\v5\CreateUserAction:
+        arguments: [ '@App\Controller\Api\CreateUser\v5\CreateUserManagerLoggerDecorator' ]
+
+    App\Controller\Api\CreateUser\v5\CreateUserManagerLoggerDecorator:
+        decorates: App\Controller\Api\CreateUser\v5\CreateUserManager
+        arguments: [ '@.inner' ]
     ```
-4. Из файла `config/packages/monolog.yaml` удаляем строку `level: critical` в `when@dev.monolog.handlers.main`
-5. Делаем запрос и проверяем работоспособность
+6. Из файла `config/packages/monolog.yaml` удаляем строку `level: critical` в `when@dev.monolog.handlers.main`
+7. Делаем запрос и проверяем работоспособность
 
 ### Логируем с помощью событий
 1. Изменяем класс `App\EventSubscriber\CreateUserEventSubscriber`
