@@ -28,6 +28,7 @@
         "symfony/form": "6.3.*",
         "symfony/framework-bundle": "6.3.*",
         "symfony/http-client": "6.3.*",
+        "symfony/lock": "6.3.*",
         "symfony/monolog-bundle": "*",
         "symfony/options-resolver": "6.3.*",
         "symfony/property-access": "6.3.*",
