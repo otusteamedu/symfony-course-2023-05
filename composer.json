@@ -55,7 +55,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "App\\Tests\\": "tests/"
+            "UnitTests\\": "tests/"
         }
     },
     "replace": {
@@ -89,6 +89,9 @@
         }
     },
     "require-dev": {
-        "symfony/maker-bundle": "^1.49"
+        "doctrine/doctrine-fixtures-bundle": "^3.4",
+        "mockery/mockery": "^1.6",
+        "symfony/maker-bundle": "^1.49",
+        "symfony/phpunit-bridge": "^6.3"
     }
 }
