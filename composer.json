@@ -56,7 +56,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "UnitTests\\": "tests/"
+            "UnitTests\\": "tests/phpunit"
         }
     },
     "replace": {
@@ -90,6 +90,13 @@
         }
     },
     "require-dev": {
+        "codeception/codeception": "^5.0",
+        "codeception/module-asserts": "^3.0",
+        "codeception/module-datafactory": "^3.0",
+        "codeception/module-doctrine2": "^3.0",
+        "codeception/module-phpbrowser": "^3.0",
+        "codeception/module-rest": "^3.3",
+        "codeception/module-symfony": "^3.1",
         "doctrine/doctrine-fixtures-bundle": "^3.4",
         "mockery/mockery": "^1.6",
         "symfony/maker-bundle": "^1.49",
