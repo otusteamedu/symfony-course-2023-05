@@ -72,12 +72,12 @@ class DefaultApiTest extends TestCase
     }
 
     /**
-     * Test case for getAppApiGetfeedV1Getfeed
+     * Test case for getFeed
      *
      * .
      *
      */
-    public function testGetAppApiGetfeedV1Getfeed()
+    public function testGetFeed()
     {
         // TODO: implement
         $this->markTestIncomplete('Not implemented');
