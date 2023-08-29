@@ -13,7 +13,7 @@ security:
 
   password_hashers:
     App\Entity\User: auto
-    Symfony\Component\Security\Core\User\User: plaintext
+    Symfony\Component\Security\Core\User\InMemoryUser: plaintext
 
   firewalls:
     dev:
@@ -27,3 +27,4 @@ security:
 
   access_control:
     - { path: ^/api/v4/users, roles: ROLE_ADMIN }
+    - { path: ^/api/doc, roles: ROLE_ADMIN }
