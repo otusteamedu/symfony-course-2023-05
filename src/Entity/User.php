@@ -2,17 +2,17 @@
 
 namespace App\Entity;
 
+use App\Domain\ValueObject\UserLogin;
 use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Mapping\Annotation as Gedmo;
-use JetBrains\PhpStorm\ArrayShape;
-use JMS\Serializer\Annotation as JMS;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Gedmo\Mapping\Annotation as Gedmo;
+use JMS\Serializer\Annotation as JMS;
 
 #[ORM\Table(name: '`user`')]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -27,16 +27,16 @@ class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthent
     #[JMS\Groups(['user-id-list'])]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 32, unique: true, nullable: false)]
+    #[ORM\Column(type: 'userLogin', length: 32, unique: true, nullable: false)]
     #[JMS\Groups(['video-user-info', 'elastica'])]
-    private string $login;
+    private UserLogin $login;
 
-    #[ORM\Column(name: 'created_at', type: 'datetime', nullable: false)]
     #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(name: 'created_at', type: 'datetime', nullable: false)]
     private DateTime $createdAt;
 
-    #[ORM\Column(name: 'updated_at', type: 'datetime', nullable: false)]
     #[Gedmo\Timestampable(on: 'update')]
+    #[ORM\Column(name: 'updated_at', type: 'datetime', nullable: false)]
     private DateTime $updatedAt;
 
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: 'Tweet')]
@@ -58,6 +58,7 @@ class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthent
     private Collection $subscriptionFollowers;
 
     #[ORM\Column(type: 'string', length: 120, nullable: false)]
+    #[JMS\Exclude]
     private string $password;
 
     #[Assert\NotBlank]
@@ -108,12 +109,12 @@ class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthent
         $this->id = $id;
     }
 
-    public function getLogin(): string
+    public function getLogin(): UserLogin
     {
         return $this->login;
     }
 
-    public function setLogin(string $login): void
+    public function setLogin(UserLogin $login): void
     {
         $this->login = $login;
     }
@@ -122,7 +123,6 @@ class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthent
         return $this->createdAt;
     }
 
-    #[ORM\PrePersist]
     public function setCreatedAt(): void {
         $this->createdAt = new DateTime();
     }
@@ -131,7 +131,6 @@ class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthent
         return $this->updatedAt;
     }
 
-    #[ORM\PreUpdate]
     public function setUpdatedAt(): void {
         $this->updatedAt = new DateTime();
     }
@@ -169,6 +168,43 @@ class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthent
         if (!$this->subscriptionFollowers->contains($subscription)) {
             $this->subscriptionFollowers->add($subscription);
         }
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'login' => $this->login->getValue(),
+            'password' => $this->password,
+            'roles' => $this->getRoles(),
+            'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
+            'updatedAt' => $this->updatedAt->format('Y-m-d H:i:s'),
+            'tweets' => array_map(static fn(Tweet $tweet) => $tweet->toArray(), $this->tweets->toArray()),
+            'followers' => array_map(
+                static fn(User $user) => ['id' => $user->getId(), 'login' => $user->getLogin()->getValue()],
+                $this->followers->toArray()
+            ),
+            'authors' => array_map(
+                static fn(User $user) => ['id' => $user->getLogin(), 'login' => $user->getLogin()->getValue()],
+                $this->authors->toArray()
+            ),
+            'subscriptionFollowers' => array_map(
+                static fn(Subscription $subscription) => [
+                    'subscription_id' => $subscription->getId(),
+                    'user_id' => $subscription->getFollower()->getId(),
+                    'login' => $subscription->getFollower()->getLogin()->getValue(),
+                ],
+                $this->subscriptionFollowers->toArray()
+            ),
+            'subscriptionAuthors' => array_map(
+                static fn(Subscription $subscription) => [
+                    'subscription_id' => $subscription->getId(),
+                    'user_id' => $subscription->getAuthor()->getId(),
+                    'login' => $subscription->getAuthor()->getLogin()->getValue(),
+                ],
+                $this->subscriptionAuthors->toArray()
+            ),
+        ];
     }
 
     public function getPassword(): string
@@ -240,12 +276,12 @@ class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthent
 
     public function getUsername(): string
     {
-        return $this->login;
+        return $this->login->getValue();
     }
 
     public function getUserIdentifier(): string
     {
-        return $this->login;
+        return $this->login->getValue();
     }
 
     public function getToken(): ?string
@@ -256,50 +292,6 @@ class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthent
     public function setToken(?string $token): void
     {
         $this->token = $token;
-    }
-
-    #[ArrayShape([
-        'id' => 'int|null',
-        'login' => 'string',
-        'password' => 'string',
-        'roles' => 'string[]',
-        'createdAt' => 'string',
-        'updatedAt' => 'string',
-        'tweets' => ['id' => 'int|null', 'login' => 'string', 'createdAt' => 'string', 'updatedAt' => 'string'],
-        'followers' => 'string[]',
-        'authors' => 'string[]',
-        'subscriptionFollowers' =>  ['subscriptionId' => 'int|null', 'userId' => 'int|null', 'login' => 'string'],
-        'subscriptionAuthors' =>  ['subscriptionId' => 'int|null', 'userId' => 'int|null', 'login' => 'string'],
-    ])]
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->id,
-            'login' => $this->login,
-            'password' => $this->password,
-            'roles' => $this->getRoles(),
-            'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
-            'updatedAt' => $this->updatedAt->format('Y-m-d H:i:s'),
-            'tweets' => array_map(static fn(Tweet $tweet) => $tweet->toArray(), $this->tweets->toArray()),
-            'followers' => array_map(static fn(User $user) => $user->getLogin(), $this->followers->toArray()),
-            'authors' => array_map(static fn(User $user) => $user->getLogin(), $this->authors->toArray()),
-            'subscriptionFollowers' => array_map(
-                static fn(Subscription $subscription) => [
-                    'subscriptionId' => $subscription->getId(),
-                    'userId' => $subscription->getFollower()->getId(),
-                    'login' => $subscription->getFollower()->getLogin(),
-                ],
-                $this->subscriptionFollowers->toArray()
-            ),
-            'subscriptionAuthors' => array_map(
-                static fn(Subscription $subscription) => [
-                    'subscriptionId' => $subscription->getId(),
-                    'userId' => $subscription->getAuthor()->getId(),
-                    'login' => $subscription->getAuthor()->getLogin(),
-                ],
-                $this->subscriptionAuthors->toArray()
-            ),
-        ];
     }
 
     public function getPhone(): ?string

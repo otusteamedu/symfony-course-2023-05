@@ -110,6 +110,7 @@
         "doctrine/doctrine-fixtures-bundle": "^3.4",
         "mockery/mockery": "^1.6",
         "phpunit/phpunit": "10.0.1",
+        "qossmic/deptrac-shim": "^1.0",
         "symfony/maker-bundle": "^1.49",
         "symfony/phpunit-bridge": "^6.3"
     },
